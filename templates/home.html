@@ -1,0 +1,146 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Processing</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        video {
+            max-width: 90%;
+            border: 5px solid #333;
+            border-radius: 10px;
+        }
+        /* #overlay {
+            position: absolute;
+            border: 2px solid red;
+            border-radius: 50%;
+            width: 50%;
+            height: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        } */
+        button {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Video Processing</h1>
+    <div id="container">
+        <video id="video" width="640" height="480" autoplay></video>
+        <div id="overlay"></div>
+    </div>
+    <button id="startButton">Start</button>
+    <a id="downloadLink" style="display: none" download="output.txt">Download</a>
+    <script>
+        const video = document.getElementById('video');
+        const startButton = document.getElementById('startButton');
+        const downloadLink = document.getElementById('downloadLink');
+        let animationFrameId;
+        let isRecording = false;
+        let startTime;
+        const duration = 30000; // 30 seconds
+
+        async function startVideo() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 640, height: 480, frameRate: { ideal: 30, max: 30 } },
+                    audio: false
+                });
+                video.srcObject = stream;
+
+                startButton.disabled = true;
+
+                isRecording = true;
+                startTime = Date.now();
+                requestAnimationFrame(processFrame);
+            } catch (err) {
+                console.error("Error:", err);
+            }
+        }
+
+        async function stopVideo() {
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+                isRecording = false;
+
+                await processingComplete();
+
+
+                startButton.disabled = false;
+            }
+        }
+
+        async function processFrame() {
+            if (isRecording) {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 1));
+                await sendFrame(blob);
+
+                if (Date.now() - startTime >= duration) {
+                    stopVideo();
+                } else {
+                    animationFrameId = requestAnimationFrame(processFrame);
+                }
+            }
+        }
+
+        async function sendFrame(blob) {
+            const formData = new FormData();
+            formData.append('frame', blob);
+
+            const response = await fetch('/process_video', {
+                method: 'POST',
+                body: formData
+            });
+        }
+
+        async function processingComplete() {
+            window.location.href = "/result";
+            // const response = await fetch('/processing_complete', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     }
+            // });
+
+            // if (response.ok) {
+            //     const data = await response.json();
+            //     const array = data.array;
+            //     const jsonData = JSON.stringify(array);
+            //     const blob = new Blob([jsonData], { type: 'text/plain;charset=utf-8' });
+            //     const url = URL.createObjectURL(blob);
+
+            //     downloadLink.href = url;
+            //     downloadLink.style.display = 'block';
+            // } else {
+            //     console.error("Error: processing not completed");
+            // }
+        }
+
+        startButton.addEventListener('click', startVideo);
+    </script>
+</body>
+
+</html>

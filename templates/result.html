@@ -1,0 +1,315 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            /* display: flex; */
+            /* flex-direction: column; */
+            align-items: center;
+            justify-content: center;
+            /* height: 100vh; */
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .grid-container {
+            display: grid;
+            /* grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); */
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            padding: 20px;
+            /* width: 90%; */
+            /* max-width: 800px; */ 
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 24px;
+            margin: 0 0 10px;
+            text-transform: capitalize;
+        }
+
+        .card-content {
+            font-size: 16px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .button-container button {
+            margin: 0 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .button-container button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Processing Result</h1>
+    <div class="grid-container" id="gridContainer">
+    </div>
+    <div class="button-container">
+        <button id="backBtn">Back</button>
+        <button id="predictButton" onclick="predict()">Predict</button>
+    </div>
+
+
+    <script>
+        let vitalSignsData;
+        async function fetchArrayData() {
+            const response = await fetch('/processing_complete', {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                console.log("process is completed this is from js")
+                const result = await response.json();
+                vitalSignsData = await result.data;
+                displayData(result.data);
+            } else {
+                console.error('Error fetching data:', response.statusText);
+            }
+        }
+
+        function displayData(data) {
+            const container = document.getElementById('gridContainer');
+            container.innerHTML = '';
+
+            for (const key in data) {
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                const title = document.createElement('h3');
+                title.className = 'card-title';
+                title.textContent = key.replace('_', ' ');
+                card.appendChild(title);
+
+                const content = document.createElement('pre');
+                content.className = 'card-content';
+                content.textContent = JSON.stringify(data[key], null, 2);
+                card.appendChild(content);
+
+                container.appendChild(card);
+            }
+        }
+        async function predict() {
+            // const vitalSignsData = await fetchArrayData();
+            // console.log("hello")
+            // console.log(vitalSignsData)
+            const response = await fetch("/predict", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ data: vitalSignsData })
+            });
+            const predictionData = await response.json();
+            console.log('Prediction Data:', predictionData);
+            const prediction = predictionData.prediction;
+            alert("Prediction: " + prediction);
+        }
+
+        fetchArrayData();
+
+        document.getElementById('backBtn').addEventListener('click', () => {
+            window.location.href = "/";
+        });
+    </script>
+</body>
+
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Result</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+        }
+
+        .grid-container {
+            width: fit-content;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+
+        }
+
+        .card {
+            width: 15%;
+            margin: 15px 15px;
+            overflow: hidden;
+            background-color: #ffffff;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            background: #242733;
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            text-transform: capitalize;
+        }
+
+        .card-content {
+            font-size: 16px;
+            font-weight: 600;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 1rem 0;
+        }
+
+        .button-container button {
+            margin: 0 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .button-container button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Processing Result</h1>
+    <div class="grid-container" id="gridContainer">
+    </div>
+
+    <div class="button-container">
+        <button id="backBtn">Back</button>
+        <button id="predictButton" onclick="predict()">Predict</button>
+    </div>
+
+
+    <script>
+        let vitalSignsData;
+        async function fetchArrayData() {
+            const response = await fetch('/processing_complete', {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                console.log("process is completed this is from js")
+                const result = await response.json();
+                vitalSignsData = await result.data;
+                displayData(result.data);
+            } else {
+                console.error('Error fetching data:', response.statusText);
+            }
+        }
+
+        function displayData(data) {
+            const container = document.getElementById('gridContainer');
+            container.innerHTML = '';
+
+
+            for (const key in data) {
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                const title = document.createElement('h3');
+                title.className = 'card-title';
+                title.textContent = key.replace('_', ' ');
+                card.appendChild(title);
+
+                const content = document.createElement('pre');
+                content.className = 'card-content';
+                content.textContent = JSON.stringify(data[key], null, 2);
+                card.appendChild(content);
+
+                container.appendChild(card);
+            }
+        }
+        async function predict() {
+            // const vitalSignsData = await fetchArrayData();
+            // console.log("hello")
+            // console.log(vitalSignsData)
+            const response = await fetch("/predict", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ data: vitalSignsData })
+            });
+            const predictionData = await response.json();
+            console.log('Prediction Data:', predictionData);
+            const prediction = predictionData.prediction;
+            alert("Prediction: " + prediction);
+        }
+
+        fetchArrayData();
+
+        document.getElementById('backBtn').addEventListener('click', () => {
+            window.location.href = "/";
+        });
+    </script>
+</body>
+
+</html>
